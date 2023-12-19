@@ -84,13 +84,13 @@ int main() {
     // Add similar lambda functions for Kernel 3, Kernel 4, Kernel 5, Kernel 6
 
     double flops_0 = benchmarkMatMul(matmulFunc_0, M, N, K);
-    double flops_1 = benchmarkMatMul(matmulFunc_1, M, N, K);
-    double flops_2 = benchmarkMatMul(matmulFunc_2, M, N, K);
+    //double flops_1 = benchmarkMatMul(matmulFunc_1, M, N, K);
+    //double flops_2 = benchmarkMatMul(matmulFunc_2, M, N, K);
     // Calculate FLOPs for Kernel 3, Kernel 4, Kernel 5, Kernel 6
 
     std::cout << "FLOPs for CUBLAS: " << flops_0 << std::endl;
-    std::cout << "FLOPs for Custom Kernel 1: " << flops_1 << std::endl;
-    std::cout << "FLOPs for Custom Kernel 2: " << flops_2 << std::endl;
+    //std::cout << "FLOPs for Custom Kernel 1: " << flops_1 << std::endl;
+    //std::cout << "FLOPs for Custom Kernel 2: " << flops_2 << std::endl;
     // Print FLOPs for Kernel 3, Kernel 4, Kernel 5, Kernel 6
 
     delete[] h_A;
