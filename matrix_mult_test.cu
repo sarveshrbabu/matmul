@@ -172,7 +172,7 @@ int main(){
 
     // Copy result back to host for kernel1
     cudaMemcpy(h_C, d_C, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
-    calculateFLOPs(milliseconds_1,  M,  N,  K);
+    double flops_1 = calculateFLOPs(milliseconds_1,  M,  N,  K);
     // Output the elapsed time or use it to calculate FLOPs
     std::cout << "Elapsed time for kernel: " << milliseconds_1 << " ms" << std::endl;
     std::cout<< "FLOPS:" <<flops_1 << " lol " << std::endl;
