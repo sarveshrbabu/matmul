@@ -81,7 +81,7 @@ int main() {
 
     // Copy result back to host for kernel2
     cudaMemcpy(h_C, d_C, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
-
+    /*
     // Test custom kernel3
     clock_t start_custom3 = clock();
     sgemm2DBlocktiling<<<gridSize, blockSize>>>(M, N, K, alpha, d_A, d_B, beta, d_C);
@@ -141,10 +141,13 @@ int main() {
 
     // Print FLOPs for kernel6
     std::cout << "FLOPs for Custom Kernel6: " << flops_custom6 << std::endl;
-
+    */
     // Test CUBLAS
     cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, d_A, M, d_B, K, &beta, d_C, M);
     cudaMemcpy(h_C, d_C, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
+
+    // Calculate FLOPs for CUBLAS
+    double flops_cublas = 2.0 * static_cast<double>(M) * static_cast<double>(N) * static_cast<double>(K) / ((end_custom1 - start_custom1) + (end_custom2 - start_custom2)) * CLOCKS_PER_SEC;
 
     // Calculate FLOPs for custom kernel1
     double flops_custom1 = 2.0 * static_cast<double>(M) * static_cast<double>(N) * static_cast<double>(K) / (end_custom1 - start_custom1) * CLOCKS_PER_SEC;
