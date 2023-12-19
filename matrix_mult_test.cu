@@ -159,6 +159,7 @@ int main() {
     // Print FLOPs for kernel1 and kernel2
     std::cout << "FLOPs for Custom Kernel1: " << flops_custom1 << std::endl;
     std::cout << "FLOPs for Custom Kernel2: " << flops_custom2 << std::endl;
+    std::cout << "FLOPs for Cublas: " << flops_cublas << std::endl;
 
     // Print proportion of FLOPs for kernel1 and kernel2
     std::cout << "Proportion of FLOPs for Kernel1: " << flops_custom1 / flops_cublas << std::endl;
