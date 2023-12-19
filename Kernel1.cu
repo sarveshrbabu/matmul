@@ -6,6 +6,8 @@
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
 
+#include "common.h"
+
 #define CEIL_DIV(M, N) (((M) + (N)-1) / (N))
 
 template <const int BLOCKSIZE>

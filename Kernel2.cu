@@ -6,7 +6,7 @@
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
 
-#define CEIL_DIV(M, N) (((M) + (N)-1) / (N))
+#include "common.h"
 
 template <const int BM, const int BN, const int BK, const int TM>
 __global__ void sgemm_multi_entry_per_thread(int M, int N, int K, float alpha,
