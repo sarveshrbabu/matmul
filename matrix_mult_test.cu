@@ -5,8 +5,12 @@
 #include <cublas_v2.h>
 
 // Include your custom kernel(s)
-#include "kernel1.cu"
-#include "kernel2.cu"
+#include "Kernel1.cu"
+#include "Kernel2.cu"
+#include "Kernel3.cu"
+#include "Kernel4.cu"
+#include "Kernel5.cu"
+#include "Kernel6.cu"
 
 void initializeMatrix(float* matrix, int size) {
     for (int i = 0; i < size; ++i) {
@@ -77,6 +81,66 @@ int main() {
 
     // Copy result back to host for kernel2
     cudaMemcpy(h_C, d_C, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
+
+    // Test custom kernel3
+    clock_t start_custom3 = clock();
+    sgemm2DBlocktiling<<<gridSize, blockSize>>>(M, N, K, alpha, d_A, d_B, beta, d_C);
+    cudaDeviceSynchronize();
+    clock_t end_custom3 = clock();
+
+    // Copy result back to host for kernel3
+    cudaMemcpy(h_C, d_C, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
+
+    // Calculate FLOPs for custom kernel3
+    double flops_custom3 = 2.0 * static_cast<double>(M) * static_cast<double>(N) * static_cast<double>(K) / (end_custom3 - start_custom3) * CLOCKS_PER_SEC;
+
+    // Print FLOPs for kernel3
+    std::cout << "FLOPs for Custom Kernel3: " << flops_custom3 << std::endl;
+
+    // Test custom kernel4
+    clock_t start_custom4 = clock();
+    sgemm_warpshuffling<<<gridSize, blockSize>>>(M, N, K, alpha, d_A, d_B, beta, d_C);
+    cudaDeviceSynchronize();
+    clock_t end_custom4 = clock();
+
+    // Copy result back to host for kernel4
+    cudaMemcpy(h_C, d_C, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
+
+    // Calculate FLOPs for custom kernel4
+    double flops_custom4 = 2.0 * static_cast<double>(M) * static_cast<double>(N) * static_cast<double>(K) / (end_custom4 - start_custom4) * CLOCKS_PER_SEC;
+
+    // Print FLOPs for kernel4
+    std::cout << "FLOPs for Custom Kernel4: " << flops_custom4 << std::endl;
+
+    // Test custom kernel5
+    clock_t start_custom5 = clock();
+    sgemm_vectorized<<<gridSize, blockSize>>>(M, N, K, alpha, d_A, d_B, beta, d_C);
+    cudaDeviceSynchronize();
+    clock_t end_custom5 = clock();
+
+    // Copy result back to host for kernel5
+    cudaMemcpy(h_C, d_C, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
+
+    // Calculate FLOPs for custom kernel5
+    double flops_custom5 = 2.0 * static_cast<double>(M) * static_cast<double>(N) * static_cast<double>(K) / (end_custom5 - start_custom5) * CLOCKS_PER_SEC;
+
+    // Print FLOPs for kernel5
+    std::cout << "FLOPs for Custom Kernel5: " << flops_custom5 << std::endl;
+
+    // Test custom kernel6
+    clock_t start_custom6 = clock();
+    sgemm2DBlockTilingAutotuned<<<gridSize, blockSize>>>(M, N, K, alpha, d_A, d_B, beta, d_C);
+    cudaDeviceSynchronize();
+    clock_t end_custom6 = clock();
+
+    // Copy result back to host for kernel6
+    cudaMemcpy(h_C, d_C, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
+
+    // Calculate FLOPs for custom kernel6
+    double flops_custom6 = 2.0 * static_cast<double>(M) * static_cast<double>(N) * static_cast<double>(K) / (end_custom6 - start_custom6) * CLOCKS_PER_SEC;
+
+    // Print FLOPs for kernel6
+    std::cout << "FLOPs for Custom Kernel6: " << flops_custom6 << std::endl;
 
     // Test CUBLAS
     cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, d_A, M, d_B, K, &beta, d_C, M);
