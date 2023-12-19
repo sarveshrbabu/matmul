@@ -81,6 +81,7 @@ int main() {
 
     // Copy result back to host for kernel2
     cudaMemcpy(h_C, d_C, sizeof(float) * M * N, cudaMemcpyDeviceToHost);
+    
     /*
     // Test custom kernel3
     clock_t start_custom3 = clock();
