@@ -268,7 +268,7 @@ int main(){
     std::cout << "FLOPS for CUBLAS: " << flopsCublas << " FLOPs/s" << std::endl;
 
     // Print proportion of FLOPs for kernel1 and kernel2
-    std::cout << "Proportion of FLOPs for Kernel1: " << flops_1 / flops_cublas << std::endl;
+    std::cout << "Proportion of FLOPs for Kernel1: " << flops_1 / flopsCublas << std::endl;
     //std::cout << "Proportion of FLOPs for Kernel2: " << flops_custom2 / flops_cublas << std::endl;
 
     // Clean up
