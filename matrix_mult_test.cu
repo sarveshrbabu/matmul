@@ -18,14 +18,32 @@ void initializeMatrix(float* matrix, int size) {
     }
 }
 
-int main(){
-    //some useful variables 
-const int M = 1024;
-const int N = 1024;
-const int K = 1024;
+double benchmarkMatMul(std::function<void()> matmulFunc, int M, int N, int K) {
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
 
-cudaSetDevice(0);
-cublasHandle_t handle;
+    cudaEventRecord(start);
+    matmulFunc();
+    cudaEventRecord(stop);
+    cudaEventSynchronize(stop);
+
+    float milliseconds = 0;
+    cudaEventElapsedTime(&milliseconds, start, stop);
+
+    cudaEventDestroy(start);
+    cudaEventDestroy(stop);
+
+    return 2.0 * M * N * K / (milliseconds / 1000.0);
+}
+
+int main() {
+    const int M = 1024;
+    const int N = 1024;
+    const int K = 1024;
+
+    cudaSetDevice(0);
+    cublasHandle_t handle;
     cublasCreate(&handle);
 
     float *d_A, *d_B, *d_C;
@@ -43,72 +61,37 @@ cublasHandle_t handle;
     cudaMemcpy(d_A, h_A, sizeof(float) * M * K, cudaMemcpyHostToDevice);
     cudaMemcpy(d_B, h_B, sizeof(float) * K * N, cudaMemcpyHostToDevice);
 
-    cudaEvent_t start, stop;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
+    float alpha = 1.0f, beta = 0.0f;
+    dim3 blockSize(16, 16); // Example block size
+    dim3 gridSize(CEIL_DIV(M, blockSize.x), CEIL_DIV(N, blockSize.y)); // Example grid size
 
-    float alpha = 1.0f;
-    float beta = 0.0f;
-
-    std::vector<std::function<void()>> kernelExecutions = {
-        //CUBLAS Default 
-        [&]() {
-            cudaEventRecord(start);
-            cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, M, N, K, &alpha, d_A, M, d_B, K, &beta, d_C, M);
-            cudaEventRecord(stop);
-            cudaEventSynchronize(stop);
-            float milliseconds = 0;
-            cudaEventElapsedTime(&milliseconds, start, stop);
-            double seconds = milliseconds / 1000.0;
-            double flops = 2.0 * M * N * K / seconds;
-            std::cout << "FLOPs for CUBLAS: " << flops << std::endl;
-        },
-        // Kernel 1
-        [&]() {
-            dim3 blockSize1(16, 16);
-            dim3 gridSize1(CEIL_DIV(M, blockSize1.x), CEIL_DIV(N, blockSize1.y));
-            cudaEventRecord(start);
-            sgemm_shared_mem_block<16><<<gridSize1, blockSize1>>>(M, N, K, alpha, d_A, d_B, beta, d_C);
-            cudaEventRecord(stop);
-            cudaEventSynchronize(stop);
-            float milliseconds1 = 0;
-            cudaEventElapsedTime(&milliseconds1, start, stop);
-            double seconds1 = milliseconds1 / 1000.0;
-            double flops1 = 2.0 * M * N * K / seconds1;
-            std::cout << "FLOPs for Custom Kernel1: " << flops1 << std::endl;
-        },
-        // Kernel 2
-        // Repeat the above structure for each kernel with their specific configurations
-        // For example:
-        [&]() {
-            const int BM = 64; // arbitrary value for BM
-            const int BN = 64; // arbitrary value for BN
-            const int BK = 8; // arbitrary value for BK
-            const int TM = 8;  // arbitrary value for TM
-
-            dim3 blockSize1(16, 16);
-            dim3 gridSize1(CEIL_DIV(M, blockSize1.x), CEIL_DIV(N, blockSize1.y));
-            cudaEventRecord(start);
-            sgemm_multi_entry_per_thread(int M, int N, int K, float alpha,
-                                             const float *A, const float *B, float beta,
-                                             float *C)
-            cudaEventRecord(stop);
-            cudaEventSynchronize(stop);
-            float milliseconds2 = 0;
-            cudaEventElapsedTime(&milliseconds2, start, stop);
-            double seconds2 = milliseconds2 / 1000.0;
-            double flops2 = 2.0 * M * N * K / seconds2;
-            std::cout << "FLOPs for Custom Kernel1: " << flops1 << std::endl;
-        },
-        // Kernel 3 and beyond will be soon 
+    // Lambda for CUBLAS
+    auto matmulFunc_0 = [&]() {
+        cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, M, K, &alpha, d_B, N, d_A, K, &beta, d_C, N);
     };
 
-    for (auto& exec : kernelExecutions) {
-        exec();
-    }
+    // Lambda for Kernel 1
+    auto matmulFunc_1 = [&]() {
+        sgemm_shared_mem_block<32><<<gridSize, blockSize>>>(M, N, K, alpha, d_A, d_B, beta, d_C);
+    };
 
-    cudaEventDestroy(start);
-    cudaEventDestroy(stop);
+    // Lambda for Kernel 2
+    auto matmulFunc_2 = [&]() {
+        sgemm_multi_entry_per_thread<64, 64, 8, 8><<<gridSize, blockSize>>>(M, N, K, alpha, d_A, d_B, beta, d_C);
+    };
+
+    // Add similar lambda functions for Kernel 3, Kernel 4, Kernel 5, Kernel 6
+
+    double flops_0 = benchmarkMatMul(matmulFunc_0, M, N, K);
+    double flops_1 = benchmarkMatMul(matmulFunc_1, M, N, K);
+    double flops_2 = benchmarkMatMul(matmulFunc_2, M, N, K);
+    // Calculate FLOPs for Kernel 3, Kernel 4, Kernel 5, Kernel 6
+
+    std::cout << "FLOPs for CUBLAS: " << flops_0 << std::endl;
+    std::cout << "FLOPs for Custom Kernel 1: " << flops_1 << std::endl;
+    std::cout << "FLOPs for Custom Kernel 2: " << flops_2 << std::endl;
+    // Print FLOPs for Kernel 3, Kernel 4, Kernel 5, Kernel 6
+
     delete[] h_A;
     delete[] h_B;
     delete[] h_C;
@@ -118,14 +101,4 @@ cublasHandle_t handle;
     cublasDestroy(handle);
 
     return 0;
-
 }
-
-
-
-
-
-
-
-
-
