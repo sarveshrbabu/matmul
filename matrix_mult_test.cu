@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <cuda_runtime.h>
+#include <functional>  // Add this line
 #include <cublas_v2.h>
 
 // Include your custom kernel(s)
