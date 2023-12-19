@@ -18,7 +18,8 @@ void initializeMatrix(float* matrix, int size) {
     }
 }
 
-//some useful variables 
+int main(){
+    //some useful variables 
 const int M = 1024;
 const int N = 1024;
 const int K = 1024;
@@ -117,7 +118,11 @@ cublasHandle_t handle;
     cublasDestroy(handle);
 
     return 0;
+
 }
+
+
+
 
 
 
