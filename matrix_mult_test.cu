@@ -151,7 +151,7 @@ int main(){
     cudaMemcpy(d_B, h_B, sizeof(float) * K * N, cudaMemcpyHostToDevice);
 
     // Test custom kernel
-    dim3 blockSize(16, 16);
+    dim3 blockSize(32, 32);
     dim3 gridSize(CEIL_DIV(M, blockSize.x), CEIL_DIV(N, blockSize.y));
 
     float alpha = 1.0;
@@ -162,7 +162,7 @@ int main(){
     cudaEventCreate(&start);
     cudaEventCreate(&stop);
     cudaEventRecord(start);
-    sgemm_shared_mem_block<16><<<gridSize, blockSize>>>(M, N, K, alpha, d_A, d_B, beta, d_C);
+    sgemm_shared_mem_block<32><<<gridSize, blockSize>>>(M, N, K, alpha, d_A, d_B, beta, d_C);
     cudaEventRecord(stop);
     cudaEventSynchronize(stop); 
     float milliseconds_1 = 0;
